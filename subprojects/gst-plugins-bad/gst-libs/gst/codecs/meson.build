@@ -1,5 +1,7 @@
 codecs_sources = files(
   'gsth264decoder.c',
+  'gsth264encoder.c',
+  'gsth264frame.c',
   'gsth264picture.c',
   'gsth265decoder.c',
   'gsth265picture.c',
@@ -16,6 +18,8 @@ codecs_sources = files(
 
 codecs_headers = files(
   'gsth264decoder.h',
+  'gsth264encoder.h',
+  'gsth264frame.h',
   'gsth264picture.h',
   'gsth265decoder.h',
   'gsth265picture.h',
@@ -62,6 +66,7 @@ if build_gir
     'install' : true,
     'extra_args' : gir_init_section + ['-DGST_USE_UNSTABLE_API'] +
       ['--c-include=gst/codecs/gsth264decoder.h',
+      '--c-include=gst/codecs/gsth264encoder.h',
       '--c-include=gst/codecs/gsth265decoder.h',
       '--c-include=gst/codecs/gstvp9decoder.h',
       '--c-include=gst/codecs/gstvp8decoder.h',
