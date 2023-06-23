@@ -47,6 +47,24 @@ struct _GstVulkanVideoProfile
   gpointer _reserved[GST_PADDING];
 };
 
+struct _GstVulkanVideoCapabilites
+{
+#if GST_VULKAN_HAVE_VIDEO_EXTENSIONS
+  VkVideoCapabilitiesKHR caps;
+  union
+  {
+    VkBaseInStructure base;
+    VkVideoDecodeH264CapabilitiesKHR h264dec;
+    VkVideoDecodeH265CapabilitiesKHR h265dec;
+#ifdef VK_ENABLE_BETA_EXTENSIONS
+    VkVideoEncodeH264CapabilitiesEXT h264enc;
+#endif
+  } codec;
+#endif
+  /* <private> */
+  gpointer _reserved[GST_PADDING];
+};
+
 GST_VULKAN_API
 GstCaps *               gst_vulkan_video_profile_to_caps        (const GstVulkanVideoProfile * profile);
 GST_VULKAN_API
