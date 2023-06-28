@@ -580,3 +580,53 @@ gst_vulkan_create_shader (GstVulkanDevice * device, const gchar * code,
   return gst_vulkan_handle_new_wrapped (device, GST_VULKAN_HANDLE_TYPE_SHADER,
       (GstVulkanHandleTypedef) shader, gst_vulkan_handle_free_shader, NULL);
 }
+
+struct choose_queue
+{
+  guint expected_flags;
+  GstVulkanQueue *queue;
+};
+
+static gboolean
+_choose_queue (GstVulkanDevice * device, GstVulkanQueue * queue,
+    struct choose_queue *data)
+{
+  guint flags =
+      device->physical_device->queue_family_props[queue->family].queueFlags;
+
+  if ((flags & data->expected_flags) != 0) {
+    if (data->queue)
+      gst_object_unref (data->queue);
+    data->queue = gst_object_ref (queue);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+GstVulkanQueue *
+gst_vulkan_select_queue (GstVulkanInstance * instance, guint expected_flags)
+{
+  struct choose_queue data;
+  GstVulkanDevice *device;
+  int i;
+
+  data.expected_flags = expected_flags;
+  data.queue = NULL;
+
+  for (i = 0; i < instance->n_physical_devices; i++) {
+    device = gst_vulkan_device_new_with_index (instance, i);
+    if (!gst_vulkan_device_open (device, NULL)) {
+      gst_object_unref (device);
+      goto beach;
+    }
+    gst_vulkan_device_foreach_queue (device,
+        (GstVulkanDeviceForEachQueueFunc) _choose_queue, &data);
+    gst_object_unref (device);
+    if (data.queue && GST_IS_VULKAN_QUEUE (data.queue))
+      break;
+  }
+
+beach:
+  return data.queue;
+}
