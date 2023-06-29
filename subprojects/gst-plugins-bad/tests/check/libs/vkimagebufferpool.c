@@ -27,7 +27,6 @@
 #include <gst/vulkan/vulkan.h>
 
 static GstVulkanInstance *instance;
-static GstVulkanDevice *device;
 static GstVulkanQueue *queue = NULL;
 
 static void
@@ -41,43 +40,7 @@ static void
 teardown (void)
 {
   gst_clear_object (&queue);
-  gst_clear_object (&device);
   gst_object_unref (instance);
-}
-
-static gboolean
-_choose_queue (GstVulkanDevice * device, GstVulkanQueue * _queue, gpointer data)
-{
-  guint flags =
-      device->physical_device->queue_family_props[_queue->family].queueFlags;
-  guint expected_flags = GPOINTER_TO_UINT (data);
-
-  if ((flags & expected_flags) != 0) {
-    gst_object_replace ((GstObject **) & queue, GST_OBJECT_CAST (_queue));
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
-static void
-setup_queue (guint expected_flags)
-{
-  int i;
-
-  gst_clear_object (&queue);
-
-  for (i = 0; i < instance->n_physical_devices; i++) {
-    device = gst_vulkan_device_new_with_index (instance, i);
-    fail_unless (gst_vulkan_device_open (device, NULL));
-    gst_vulkan_device_foreach_queue (device, _choose_queue,
-        GUINT_TO_POINTER (expected_flags));
-    if (queue && GST_IS_VULKAN_QUEUE (queue))
-      break;
-    gst_object_unref (device);
-  }
-
-  fail_unless (GST_IS_VULKAN_QUEUE (queue));
 }
 
 static GstBufferPool *
@@ -93,7 +56,7 @@ create_buffer_pool (const char *format, VkImageUsageFlags usage,
   gst_caps_set_features_simple (caps,
       gst_caps_features_new (GST_CAPS_FEATURE_MEMORY_VULKAN_IMAGE, NULL));
 
-  pool = gst_vulkan_image_buffer_pool_new (device);
+  pool = gst_vulkan_image_buffer_pool_new (queue->device);
 
   config = gst_buffer_pool_get_config (pool);
 
@@ -118,7 +81,7 @@ GST_START_TEST (test_image)
   GstFlowReturn ret;
   GstBuffer *buffer = NULL;
 
-  setup_queue (VK_QUEUE_COMPUTE_BIT);
+  queue = gst_vulkan_select_queue (instance, VK_QUEUE_COMPUTE_BIT);
   pool = create_buffer_pool ("NV12", 0, NULL);
 
   ret = gst_buffer_pool_acquire_buffer (pool, &buffer, NULL);
@@ -193,8 +156,8 @@ GST_START_TEST (test_decoding_image)
   /* *INDENT-ON* */
 
   /* force to use a queue with decoding support */
-  setup_queue (VK_QUEUE_VIDEO_DECODE_BIT_KHR);
-  if ((device->physical_device->queue_family_ops[queue->family].video
+  queue = gst_vulkan_select_queue (instance, VK_QUEUE_VIDEO_DECODE_BIT_KHR);
+  if ((queue->device->physical_device->queue_family_ops[queue->family].video
           & VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR) == 0)
     return;
 
