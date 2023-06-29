@@ -39,8 +39,11 @@ struct _GstVulkanVideoProfile
   VkVideoDecodeUsageInfoKHR usage;
   union {
     VkBaseInStructure base;
-    VkVideoDecodeH264ProfileInfoKHR h264;
-    VkVideoDecodeH265ProfileInfoKHR h265;
+    VkVideoDecodeH264ProfileInfoKHR h264dec;
+    VkVideoDecodeH265ProfileInfoKHR h265dec;
+#ifdef VK_ENABLE_BETA_EXTENSIONS
+    VkVideoEncodeH264ProfileInfoEXT h264enc;
+#endif
   } codec;
 #endif
   /* <private> */
