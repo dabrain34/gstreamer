@@ -633,8 +633,8 @@ gst_vulkan_decoder_decode (GstVulkanDecoder * self,
 
   barriers = gst_vulkan_operation_create_barriers (priv->exec);
 
-  new_layout = (pic->dpb) ? VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR :
-      VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR;
+  new_layout = (pic->dpb) ? VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR :
+      VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR;
   gst_vulkan_operation_add_frame_barrier (priv->exec, pic->out, barriers,
       VK_PIPELINE_STAGE_2_VIDEO_DECODE_BIT_KHR,
       VK_ACCESS_2_VIDEO_DECODE_WRITE_BIT_KHR, new_layout, NULL);
@@ -661,11 +661,13 @@ gst_vulkan_decoder_decode (GstVulkanDecoder * self,
         return FALSE;
       }
 
-      gst_vulkan_operation_add_frame_barrier (priv->exec, ref_buf, barriers,
-          VK_PIPELINE_STAGE_2_VIDEO_DECODE_BIT_KHR,
-          VK_ACCESS_2_VIDEO_DECODE_WRITE_BIT_KHR
-          | VK_ACCESS_2_VIDEO_DECODE_WRITE_BIT_KHR,
-          VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR, NULL);
+      if (!ref_pic->dpb) {
+        gst_vulkan_operation_add_frame_barrier (priv->exec, ref_buf, barriers,
+            VK_PIPELINE_STAGE_2_VIDEO_DECODE_BIT_KHR,
+            VK_ACCESS_2_VIDEO_DECODE_WRITE_BIT_KHR
+            | VK_ACCESS_2_VIDEO_DECODE_READ_BIT_KHR,
+            VK_IMAGE_LAYOUT_VIDEO_DECODE_DPB_KHR, NULL);
+      }
     }
   } else if (pic->decode_info.referenceSlotCount > 1
       || pic->img_view_out != pic->img_view_ref) {
@@ -687,8 +689,6 @@ gst_vulkan_decoder_decode (GstVulkanDecoder * self,
     });
   /* *INDENT-ON* */
 
-  g_array_unref (barriers);
-
   priv->vk.CmdBeginVideoCoding (cmd_buf->cmd, &decode_start);
   gst_vulkan_operation_begin_query (priv->exec);
   priv->vk.CmdDecodeVideo (cmd_buf->cmd, &pic->decode_info);
@@ -697,6 +697,8 @@ gst_vulkan_decoder_decode (GstVulkanDecoder * self,
 
   ret = gst_vulkan_operation_submit (priv->exec, error);
   gst_vulkan_operation_wait (priv->exec);
+
+  g_array_unref (barriers);
 
   return ret;
 }
