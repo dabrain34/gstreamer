@@ -101,6 +101,11 @@ GST_VULKAN_API
 const gchar *                       gst_vulkan_video_get_profile_from_caps (GstCaps * caps);
 GST_VULKAN_API
 StdVideoH264ChromaFormatIdc         gst_vulkan_video_h264_chromat_from_format (GstVideoFormat format);
+GST_VULKAN_API
+gboolean                            gst_vulkan_video_get_chroma_info_from_format (GstVideoFormat format,
+                                                                                  VkVideoChromaSubsamplingFlagBitsKHR * chroma_format,
+                                                                                  VkVideoComponentBitDepthFlagsKHR * bit_depth_luma,
+                                                                                  VkVideoComponentBitDepthFlagsKHR * bit_depth_chroma);
 
 GST_VULKAN_API
 StdVideoH264PictureType             gst_vulkan_video_h264_picture_type (GstH264SliceType type, gboolean key_type);
