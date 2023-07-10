@@ -66,16 +66,18 @@ struct _GstVulkanVideoFunctions
 extern const VkExtensionProperties _vk_codec_extensions[2];
 extern const VkComponentMapping _vk_identity_component_map;
 
-gboolean                gst_vulkan_video_get_vk_functions       (GstVulkanInstance * instance,
-                                                                 GstVulkanVideoFunctions * vk_funcs);
+gboolean                        gst_vulkan_video_get_vk_functions       (GstVulkanInstance * instance,
+                                                                         GstVulkanVideoFunctions * vk_funcs);
 
-gboolean                gst_vulkan_video_session_create         (GstVulkanVideoSession * session,
+gboolean                        gst_vulkan_video_session_create         (GstVulkanVideoSession * session,
                                                                  GstVulkanDevice * device,
                                                                  GstVulkanVideoFunctions * vk,
                                                                  VkVideoSessionCreateInfoKHR * session_create,
                                                                  GError ** error);
 
-void                    gst_vulkan_video_session_destroy        (GstVulkanVideoSession * session);
+void                            gst_vulkan_video_session_destroy        (GstVulkanVideoSession * session);
+
+void                            gst_vulkan_video_session_handle_free_parameters (GstVulkanHandle * handle, gpointer data);
 
 GstBuffer *             gst_vulkan_video_codec_buffer_new       (GstVulkanDevice * device,
                                                                  const GstVulkanVideoProfile *profile,
