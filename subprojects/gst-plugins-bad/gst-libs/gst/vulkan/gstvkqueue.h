@@ -25,6 +25,9 @@
 #include <gst/vulkan/gstvkcommandpool.h>
 #if GST_VULKAN_HAVE_VIDEO_EXTENSIONS
 #include <gst/vulkan/gstvkdecoder.h>
+#if VK_ENABLE_BETA_EXTENSIONS
+#include <gst/vulkan/gstvkencoder.h>
+#endif
 #endif
 
 #define GST_TYPE_VULKAN_QUEUE         (gst_vulkan_queue_get_type())
@@ -93,6 +96,11 @@ GST_VULKAN_API
 GstVulkanDecoder *  gst_vulkan_queue_create_decoder             (GstVulkanQueue * queue,
                                                                  guint codec);
 
+#if VK_ENABLE_BETA_EXTENSIONS
+GST_VULKAN_API
+GstVulkanEncoder *  gst_vulkan_queue_create_encoder             (GstVulkanQueue * queue,
+                                                                 VkVideoCodecOperationFlagBitsKHR codec);
+#endif
 GST_VULKAN_API
 void                gst_vulkan_queue_submit_lock                (GstVulkanQueue * queue);
 GST_VULKAN_API

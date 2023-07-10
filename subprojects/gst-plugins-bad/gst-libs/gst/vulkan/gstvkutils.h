@@ -67,6 +67,11 @@ GstVulkanHandle *       gst_vulkan_create_shader                (GstVulkanDevice
 
 GST_VULKAN_API
 GstVulkanQueue *        gst_vulkan_select_queue                 (GstVulkanInstance * instance, guint expected_flags);
+
+GST_VULKAN_API
+GstVulkanImageView *    gst_vulkan_get_image_view               (GstBuffer * buf,
+                                                                 VkSamplerYcbcrConversionInfo * yuv_sampler_info);
+
 G_END_DECLS
 
 #endif /*_VK_UTILS_H_ */

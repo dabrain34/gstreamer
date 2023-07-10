@@ -125,6 +125,11 @@ typedef struct _GstVulkanDecoderPrivate GstVulkanDecoderPrivate;
 typedef union _GstVulkanDecoderParameters GstVulkanDecoderParameters;
 typedef struct _GstVulkanDecoderPicture GstVulkanDecoderPicture;
 
+typedef struct _GstVulkanEncoder GstVulkanEncoder;
+typedef struct _GstVulkanEncoderClass GstVulkanEncoderClass;
+typedef struct _GstVulkanEncoderPrivate GstVulkanEncoderPrivate;
+typedef union _GstVulkanEncoderParameters GstVulkanEncoderParameters;
+
 G_END_DECLS
 
 #endif /* __GST_VULKAN_FWD_H__ */

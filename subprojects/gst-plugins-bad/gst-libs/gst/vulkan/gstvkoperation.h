@@ -58,6 +58,13 @@ struct _GstVulkanOperationClass
 
 };
 
+typedef struct _GstVulkanEncodeQueryResult
+{
+  uint32_t offset;
+  uint32_t data_size;
+  VkQueryResultStatusKHR status;
+} GstVulkanEncodeQueryResult;
+
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (GstVulkanOperation, gst_object_unref)
 
 GST_VULKAN_API
