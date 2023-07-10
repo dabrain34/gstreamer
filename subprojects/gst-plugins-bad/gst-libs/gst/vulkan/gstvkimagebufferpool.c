@@ -102,10 +102,29 @@ gst_vulkan_image_buffer_pool_config_set_decode_caps (GstStructure * config,
   gst_structure_set (config, "decode-caps", GST_TYPE_CAPS, caps, NULL);
 }
 
+/**
+ * gst_vulkan_image_buffer_pool_config_set_encode_caps:
+ * @config: the #GstStructure with the pool's configuration.
+ * @caps: Upstream encode caps.
+ *
+ * Encode @caps are used when the buffers are going to be used either as encoded
+ * src or DPB images.
+ *
+ * Since: 1.24
+ */
+void
+gst_vulkan_image_buffer_pool_config_set_encode_caps (GstStructure * config,
+    GstCaps * caps)
+{
+  g_return_if_fail (GST_IS_CAPS (caps));
+
+  gst_structure_set (config, "encode-caps", GST_TYPE_CAPS, caps, NULL);
+}
+
 static inline gboolean
 gst_vulkan_image_buffer_pool_config_get_allocation_params (GstStructure *
     config, VkImageUsageFlags * usage, VkMemoryPropertyFlags * mem_props,
-    guint32 * n_layers, GstCaps ** decode_caps)
+    guint32 * n_layers, GstCaps ** decode_caps, GstCaps ** encode_caps)
 {
   if (!gst_structure_get_uint (config, "usage", usage)) {
     *usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT
@@ -122,6 +141,9 @@ gst_vulkan_image_buffer_pool_config_get_allocation_params (GstStructure *
   if (decode_caps)
     gst_structure_get (config, "decode-caps", GST_TYPE_CAPS, decode_caps, NULL);
 
+  if (encode_caps)
+    gst_structure_get (config, "encode-caps", GST_TYPE_CAPS, encode_caps, NULL);
+
   return TRUE;
 }
 
@@ -135,7 +157,8 @@ gst_vulkan_image_buffer_pool_set_config (GstBufferPool * pool,
   VkImageUsageFlags supported_usage;
   VkImageCreateInfo image_info;
   guint min_buffers, max_buffers;
-  GstCaps *caps = NULL, *decode_caps = NULL;
+  GstCaps *caps = NULL, *decode_caps = NULL, *encode_caps = NULL;
+
   GstCapsFeatures *features;
   gboolean found, no_multiplane = FALSE, ret = TRUE;
   guint i;
@@ -161,7 +184,7 @@ gst_vulkan_image_buffer_pool_set_config (GstBufferPool * pool,
       GST_CAPS_FEATURES_MEMORY_SYSTEM_MEMORY);
 
   gst_vulkan_image_buffer_pool_config_get_allocation_params (config,
-      &priv->usage, &priv->mem_props, &priv->n_layers, &decode_caps);
+      &priv->usage, &priv->mem_props, &priv->n_layers, &decode_caps, &encode_caps);
 
   priv->has_profile = FALSE;
 #if GST_VULKAN_HAVE_VIDEO_EXTENSIONS
@@ -172,8 +195,18 @@ gst_vulkan_image_buffer_pool_set_config (GstBufferPool * pool,
         gst_vulkan_video_profile_from_caps (&priv->profile, decode_caps,
         GST_VULKAN_VIDEO_OPERATION_DECODE);
   }
-#endif
   gst_clear_caps (&decode_caps);
+#ifdef VK_ENABLE_BETA_EXTENSIONS
+  if (encode_caps && ((priv->usage
+              & (VK_IMAGE_USAGE_VIDEO_ENCODE_DST_BIT_KHR
+                  | VK_IMAGE_USAGE_VIDEO_ENCODE_DPB_BIT_KHR)) != 0)) {
+    priv->has_profile =
+        gst_vulkan_video_profile_from_caps (&priv->profile, encode_caps,
+        GST_VULKAN_VIDEO_OPERATION_ENCODE);
+  }
+  gst_clear_caps (&encode_caps);
+#endif
+#endif
 
 #if GST_VULKAN_HAVE_VIDEO_EXTENSIONS
   if (((priv->usage & (VK_IMAGE_USAGE_VIDEO_DECODE_DST_BIT_KHR
