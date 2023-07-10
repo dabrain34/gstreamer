@@ -37,6 +37,12 @@ const VkExtensionProperties _vk_codec_extensions[] = {
     .extensionName = VK_STD_VULKAN_VIDEO_CODEC_H265_DECODE_EXTENSION_NAME,
     .specVersion = VK_STD_VULKAN_VIDEO_CODEC_H265_DECODE_SPEC_VERSION,
   },
+#ifdef VK_ENABLE_BETA_EXTENSIONS
+  {
+    .extensionName = VK_STD_VULKAN_VIDEO_CODEC_H264_ENCODE_EXTENSION_NAME,
+    .specVersion = VK_STD_VULKAN_VIDEO_CODEC_H264_ENCODE_SPEC_VERSION,
+  },
+#endif
 };
 
 const VkComponentMapping _vk_identity_component_map = {
@@ -49,7 +55,7 @@ const VkComponentMapping _vk_identity_component_map = {
 
 gboolean
 gst_vulkan_video_get_vk_functions (GstVulkanInstance * instance,
-    GstVulkanVideoFunctions * vk_funcs)
+    GstVulkanVideoFunctions * vk_funcs, gboolean beta_extensions)
 {
   gboolean ret = FALSE;
 
@@ -66,8 +72,13 @@ gst_vulkan_video_get_vk_functions (GstVulkanInstance * instance,
     }                                                                   \
   } G_STMT_END;
   GST_VULKAN_VIDEO_FN_LIST (GET_PROC_ADDRESS_REQUIRED)
+#if VK_ENABLE_BETA_EXTENSIONS
+      if (beta_extensions) {
+    GST_VULKAN_VIDEO_BETA_FN_LIST (GET_PROC_ADDRESS_REQUIRED)
+  }
+#endif
 #undef GET_PROC_ADDRESS_REQUIRED
-      ret = TRUE;
+  ret = TRUE;
 
 bail:
   return ret;

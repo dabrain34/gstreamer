@@ -81,7 +81,7 @@ _populate_function_table (gpointer data)
     return GINT_TO_POINTER (FALSE);
   }
 
-  ret = gst_vulkan_video_get_vk_functions (instance, &priv->vk);
+  ret = gst_vulkan_video_get_vk_functions (instance, &priv->vk, FALSE);
   gst_object_unref (instance);
   return GINT_TO_POINTER (ret);
 }

@@ -138,10 +138,22 @@ elif host_system == 'windows'
     endif
   endif
 else
+  vulkan_root = get_option('vulkan-sdk-path')
+  if vulkan_root == ''
+    vulkan_root = run_command(python3, '-c', 'import os; print(os.environ.get("VK_SDK_PATH"))', check: false).stdout().strip()
+  endif
+  if vulkan_root != '' and vulkan_root != 'None'
+    vulkan_inc_dir = join_paths(vulkan_root, 'include')
+  endif
   vulkan_dep = dependency('vulkan', method: 'pkg-config', required : false)
   if not vulkan_dep.found()
     vulkan_dep = cc.find_library('vulkan', required : false)
   endif
+  if vulkan_inc_dir != ''
+    vulkan_dep = declare_dependency(include_directories: include_directories(vulkan_inc_dir),
+                                      dependencies: vulkan_dep)
+  endif
+
 endif
 
 if host_system != 'windows'
@@ -327,6 +339,15 @@ static StdVideoH265SequenceParameterSet h265_sps;
 static StdVideoH265PictureParameterSet h265_pps;
 '''
 
+video_beta_test = '''
+#include <vulkan/vulkan.h>
+
+#if !(defined(VK_VERSION_1_4) || (defined(VK_VERSION_1_3) && VK_HEADER_VERSION >= 253))
+#error "Need at least Vulkan 1.3.253"
+#endif
+
+'''
+
   if vulkan_inc_dir != ''
     have_vk_video = cc.compiles(video_test, dependencies : vulkan_dep,  args: '-I' + vulkan_inc_dir)
   else
@@ -341,9 +362,28 @@ static StdVideoH265PictureParameterSet h265_pps;
     vulkan_headers += files(
       'gstvkdecoder.h'
     )
+    if vulkan_inc_dir != ''
+      have_vk_beta_video = cc.compiles(video_beta_test, dependencies : vulkan_dep,  args: '-I' + vulkan_inc_dir)
+    else
+      have_vk_beta_video = cc.compiles(video_beta_test, dependencies : vulkan_dep)
+    endif
+    if have_vk_beta_video
+      message ('Vulkan Video beta extensions found')
+      vulkan_sources += files(
+        'gstvkencoder.c',
+      )
+      vulkan_headers += files(
+        'gstvkencoder.h',
+      )
+      vulkan_conf.set('GST_VULKAN_HAVE_BETA_EXTENSIONS', 1)
+      vulkan_defines += ['-DVK_ENABLE_BETA_EXTENSIONS=1']
+    else
+      message('The Vulkan encoder needs minimum 1.3.253 SDK includes, they can be found in Vulkan-Headers and used with VK_SDK_PATH="Vulkan-Headers/build/install before running the meson configure')
+    endif
   elif get_option('vulkan-video').enabled()
     error('Vulkan Video extensions headers not found')
   endif
+  optional_deps += [gstcodecs_dep]
 endif
 
 gen_sources = []

@@ -56,18 +56,29 @@ struct _GstVulkanVideoSession
   V(CmdEndVideoCoding)                                                         \
   V(CmdDecodeVideo)
 
+#if VK_ENABLE_BETA_EXTENSIONS
+#define GST_VULKAN_VIDEO_BETA_FN_LIST(V) \
+  V(CmdEncodeVideo) \
+  V(GetEncodedVideoSessionParameters)
+#endif
 struct _GstVulkanVideoFunctions
 {
 #define DEFINE_FUNCTION(name) G_PASTE(G_PASTE(PFN_vk, name), KHR) name;
     GST_VULKAN_VIDEO_FN_LIST (DEFINE_FUNCTION)
 #undef DEFINE_FUNCTION
+#if VK_ENABLE_BETA_EXTENSIONS
+#define DEFINE_FUNCTION(name) G_PASTE(G_PASTE(PFN_vk, name), KHR) name;
+    GST_VULKAN_VIDEO_BETA_FN_LIST (DEFINE_FUNCTION)
+#undef DEFINE_FUNCTION
+#endif
 };
 
-extern const VkExtensionProperties _vk_codec_extensions[2];
+extern const VkExtensionProperties _vk_codec_extensions[3];
 extern const VkComponentMapping _vk_identity_component_map;
 
 gboolean                        gst_vulkan_video_get_vk_functions       (GstVulkanInstance * instance,
-                                                                         GstVulkanVideoFunctions * vk_funcs);
+                                                                         GstVulkanVideoFunctions * vk_funcs,
+                                                                         gboolean beta_extensions);
 
 gboolean                        gst_vulkan_video_session_create         (GstVulkanVideoSession * session,
                                                                  GstVulkanDevice * device,

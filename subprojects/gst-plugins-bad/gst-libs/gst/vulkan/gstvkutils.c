@@ -630,3 +630,52 @@ gst_vulkan_select_queue (GstVulkanInstance * instance, guint expected_flags)
 beach:
   return data.queue;
 }
+
+static inline GstVulkanImageMemory *
+_get_image_memory (GstBuffer * buf)
+{
+  GstMemory *mem;
+  guint in_n_mems = gst_buffer_n_memory (buf);
+  int i;
+
+  for (i = 0; i < in_n_mems; i++) {
+    mem = gst_buffer_peek_memory (buf, 0);
+    if (!gst_is_vulkan_image_memory (mem))
+      return NULL;
+  }
+
+  return (GstVulkanImageMemory *) mem;
+}
+
+GstVulkanImageView *
+gst_vulkan_get_image_view (GstBuffer * buf,
+    VkSamplerYcbcrConversionInfo * yuv_sampler_info)
+{
+  GstVulkanImageMemory *mem = _get_image_memory (buf);
+
+  /* *INDENT-OFF* */
+  VkImageViewCreateInfo create_info = {
+    .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+    .pNext = yuv_sampler_info,
+    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+    .format = mem->create_info.format,
+    .image = mem->image,
+    .components = (VkComponentMapping) {
+      .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+      .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+      .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+      .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+    },
+    .subresourceRange = (VkImageSubresourceRange) {
+      .aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT,
+      .baseArrayLayer = 0,
+      .layerCount     = VK_REMAINING_ARRAY_LAYERS,
+      .levelCount     = 1,
+    },
+  };
+  /* *INDENT-ON* */
+
+  g_assert (mem);
+
+  return gst_vulkan_get_or_create_image_view_with_info (mem, &create_info);
+}

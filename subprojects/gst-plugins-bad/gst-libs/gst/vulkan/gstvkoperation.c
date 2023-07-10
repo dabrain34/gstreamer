@@ -976,7 +976,11 @@ gst_vulkan_operation_get_query (GstVulkanOperation * self, gsize data_size,
 
 #if GST_VULKAN_HAVE_VIDEO_EXTENSIONS
   if (priv->has_video
-      && (priv->query_type == VK_QUERY_TYPE_RESULT_STATUS_ONLY_KHR)) {
+      && (priv->query_type == VK_QUERY_TYPE_RESULT_STATUS_ONLY_KHR
+#if VK_ENABLE_BETA_EXTENSIONS
+          || priv->query_type == VK_QUERY_TYPE_VIDEO_ENCODE_FEEDBACK_KHR
+#endif
+      )) {
     flags |= VK_QUERY_RESULT_WITH_STATUS_BIT_KHR;
   }
 #endif
