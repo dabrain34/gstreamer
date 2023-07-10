@@ -68,11 +68,18 @@ struct _GstVulkanVideoCapabilites
   gpointer _reserved[GST_PADDING];
 };
 
+typedef enum  {
+  GST_VULKAN_VIDEO_OPERATION_DECODE = 0,
+  GST_VULKAN_VIDEO_OPERATION_ENCODE,
+  GST_VULKAN_VIDEO_OPERATION_UNKNOWN,
+} GstVulkanVideoOperation;
+
 GST_VULKAN_API
 GstCaps *               gst_vulkan_video_profile_to_caps        (const GstVulkanVideoProfile * profile);
 GST_VULKAN_API
 gboolean                gst_vulkan_video_profile_from_caps      (GstVulkanVideoProfile * profile,
-                                                                 GstCaps * caps);
+                                                                 GstCaps * caps,
+                                                                 GstVulkanVideoOperation video_operation);
 GST_VULKAN_API
 gboolean                gst_vulkan_video_profile_is_valid       (GstVulkanVideoProfile * profile,
                                                                  guint codec);
