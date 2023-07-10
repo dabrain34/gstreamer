@@ -233,3 +233,20 @@ gst_vulkan_video_codec_buffer_new (GstVulkanDevice * device,
   gst_buffer_append_memory (buf, mem);
   return buf;
 }
+
+void
+gst_vulkan_video_session_handle_free_parameters (GstVulkanHandle * handle,
+    gpointer data)
+{
+  PFN_vkDestroyVideoSessionParametersKHR vkDestroyVideoSessionParameters;
+
+  g_return_if_fail (handle != NULL);
+  g_return_if_fail (handle->handle != VK_NULL_HANDLE);
+  g_return_if_fail (handle->type ==
+      GST_VULKAN_HANDLE_TYPE_VIDEO_SESSION_PARAMETERS);
+  g_return_if_fail (handle->user_data);
+
+  vkDestroyVideoSessionParameters = handle->user_data;
+  vkDestroyVideoSessionParameters (handle->device->device,
+      (VkVideoSessionKHR) handle->handle, NULL);
+}

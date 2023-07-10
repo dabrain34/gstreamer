@@ -769,23 +769,6 @@ gst_vulkan_decoder_profile_caps (GstVulkanDecoder * self)
   return gst_caps_ref (priv->profile_caps);
 }
 
-static void
-gst_vulkan_handle_free_video_session_parameters (GstVulkanHandle * handle,
-    gpointer data)
-{
-  PFN_vkDestroyVideoSessionParametersKHR vkDestroyVideoSessionParameters;
-
-  g_return_if_fail (handle != NULL);
-  g_return_if_fail (handle->handle != VK_NULL_HANDLE);
-  g_return_if_fail (handle->type ==
-      GST_VULKAN_HANDLE_TYPE_VIDEO_SESSION_PARAMETERS);
-  g_return_if_fail (handle->user_data);
-
-  vkDestroyVideoSessionParameters = handle->user_data;
-  vkDestroyVideoSessionParameters (handle->device->device,
-      (VkVideoSessionKHR) handle->handle, NULL);
-}
-
 static GstVulkanHandle *
 gst_vulkan_decoder_new_codec_parameters (GstVulkanDecoder * self,
     GstVulkanDecoderParameters * params, GError ** error)
@@ -817,7 +800,7 @@ gst_vulkan_decoder_new_codec_parameters (GstVulkanDecoder * self,
   return gst_vulkan_handle_new_wrapped (self->queue->device,
       GST_VULKAN_HANDLE_TYPE_VIDEO_SESSION_PARAMETERS,
       (GstVulkanHandleTypedef) session_params,
-      gst_vulkan_handle_free_video_session_parameters,
+      gst_vulkan_video_session_handle_free_parameters,
       priv->vk.DestroyVideoSessionParameters);
 }
 
