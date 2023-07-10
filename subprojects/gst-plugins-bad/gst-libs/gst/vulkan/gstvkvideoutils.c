@@ -557,3 +557,19 @@ gst_vulkan_video_h264_slice_type (GstH264SliceType type)
       return STD_VIDEO_H264_SLICE_TYPE_INVALID;
   }
 }
+
+StdVideoH264ProfileIdc
+gst_vulkan_video_h264_profile_type (GstH264Profile profile)
+{
+  switch (profile) {
+    case GST_H264_PROFILE_BASELINE:
+      return STD_VIDEO_H264_PROFILE_IDC_BASELINE;
+    case GST_H264_PROFILE_MAIN:
+      return STD_VIDEO_H264_PROFILE_IDC_MAIN;
+    case GST_H264_PROFILE_HIGH:
+      return STD_VIDEO_H264_PROFILE_IDC_HIGH;
+    default:
+      GST_WARNING ("Unsupported profile type '%d'", profile);
+      return STD_VIDEO_H264_PROFILE_IDC_INVALID;
+  }
+}
