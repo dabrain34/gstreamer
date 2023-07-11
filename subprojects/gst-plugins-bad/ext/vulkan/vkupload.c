@@ -461,7 +461,12 @@ _buffer_to_image_perform (gpointer impl, GstBuffer * inbuf, GstBuffer ** outbuf)
     guint min = 0, max = 0;
     gsize size = 1;
 
-    raw->pool = gst_vulkan_image_buffer_pool_new (raw->upload->device);
+    if (raw->upload->pool
+        && GST_IS_VULKAN_IMAGE_BUFFER_POOL (raw->upload->pool))
+      raw->pool = gst_object_ref (raw->upload->pool);
+    else
+      raw->pool = gst_vulkan_image_buffer_pool_new (raw->upload->device);
+
     config = gst_buffer_pool_get_config (raw->pool);
     gst_buffer_pool_config_set_params (config, raw->upload->out_caps, size, min,
         max);
@@ -729,7 +734,11 @@ _raw_to_image_perform (gpointer impl, GstBuffer * inbuf, GstBuffer ** outbuf)
     guint min = 0, max = 0;
     gsize size = 1;
 
-    raw->pool = gst_vulkan_image_buffer_pool_new (raw->upload->device);
+    if (raw->upload->pool && GST_IS_VULKAN_IMAGE_BUFFER_POOL(raw->upload->pool))
+      raw->pool = gst_object_ref (raw->upload->pool);
+    else
+      raw->pool = gst_vulkan_image_buffer_pool_new (raw->upload->device);
+
     config = gst_buffer_pool_get_config (raw->pool);
     gst_buffer_pool_config_set_params (config, raw->upload->out_caps, size, min,
         max);
@@ -1127,6 +1136,9 @@ gst_vulkan_upload_finalize (GObject * object)
   g_free (vk_upload->upload_impls);
   vk_upload->upload_impls = NULL;
 
+  if (vk_upload->pool)
+    gst_object_unref (vk_upload->pool);
+
   G_OBJECT_CLASS (parent_class)->finalize (object);
 }
 
@@ -1394,6 +1406,51 @@ gst_vulkan_upload_propose_allocation (GstBaseTransform * bt,
 static gboolean
 gst_vulkan_upload_decide_allocation (GstBaseTransform * bt, GstQuery * query)
 {
+  GstVulkanUpload *vk_upload = GST_VULKAN_UPLOAD (bt);
+  GstBufferPool *pool = NULL;
+  GstStructure *config;
+  GstCaps *caps;
+  guint min, max, size;
+  gboolean update_pool;
+
+  gst_query_parse_allocation (query, &caps, NULL);
+  if (!caps)
+    return FALSE;
+
+  if (gst_query_get_n_allocation_pools (query) > 0) {
+    gst_query_parse_nth_allocation_pool (query, 0, &pool, &size, &min, &max);
+
+    update_pool = TRUE;
+  } else {
+    GstVideoInfo vinfo;
+
+    gst_video_info_init (&vinfo);
+    gst_video_info_from_caps (&vinfo, caps);
+    size = vinfo.size;
+    min = max = 0;
+    update_pool = FALSE;
+  }
+
+  if (!pool || !GST_IS_VULKAN_IMAGE_BUFFER_POOL (pool)) {
+    if (pool)
+      gst_object_unref (pool);
+    pool = gst_vulkan_image_buffer_pool_new (vk_upload->device);
+  }
+
+  config = gst_buffer_pool_get_config (pool);
+
+  gst_buffer_pool_config_set_params (config, caps, size, min, max);
+
+  gst_buffer_pool_set_config (pool, config);
+
+  if (update_pool)
+    gst_query_set_nth_allocation_pool (query, 0, pool, size, min, max);
+  else
+    gst_query_add_allocation_pool (query, pool, size, min, max);
+
+  vk_upload->pool = gst_object_ref (pool);
+  gst_object_unref (pool);
+
   return TRUE;
 }
 

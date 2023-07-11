@@ -73,6 +73,8 @@ struct _GstVulkanUpload
   /* all impl pointers */
   gpointer              *upload_impls;
   guint                 current_impl;
+
+  GstBufferPool*         pool;
 };
 
 struct _GstVulkanUploadClass
