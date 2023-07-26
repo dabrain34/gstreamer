@@ -23,6 +23,15 @@
 #include <gst/gst.h>
 #include <gst/vulkan/gstvkapi.h>
 
+
+#ifndef GST_USE_UNSTABLE_API
+# define GST_USE_UNSTABLE_API
+#endif
+#include <gst/codecparsers/gsth264parser.h>
+#undef GST_USE_UNSTABLE_API
+
+#include <gst/video/video.h>
+
 G_BEGIN_DECLS
 
 /**
@@ -87,4 +96,15 @@ GST_VULKAN_API
 gboolean                gst_vulkan_video_profile_is_equal       (const GstVulkanVideoProfile * a,
                                                                  const GstVulkanVideoProfile * b);
 
+
+GST_VULKAN_API
+const gchar *                       gst_vulkan_video_get_profile_from_caps (GstCaps * caps);
+GST_VULKAN_API
+StdVideoH264ChromaFormatIdc         gst_vulkan_video_h264_chromat_from_format (GstVideoFormat format);
+
+GST_VULKAN_API
+StdVideoH264PictureType             gst_vulkan_video_h264_picture_type (GstH264SliceType type, gboolean key_type);
+
+GST_VULKAN_API
+StdVideoH264SliceType               gst_vulkan_video_h264_slice_type (GstH264SliceType type);
 G_END_DECLS

@@ -440,3 +440,72 @@ gst_vulkan_video_profile_is_equal (const GstVulkanVideoProfile * a,
   return FALSE;
 #endif
 }
+
+const gchar *
+gst_vulkan_video_get_profile_from_caps (GstCaps * caps)
+{
+  const GstStructure *structure = gst_caps_get_structure (caps, 0);
+
+  if (!structure)
+    return NULL;
+  return gst_structure_get_string (structure, "profile");
+}
+
+StdVideoH264ChromaFormatIdc
+gst_vulkan_video_h264_chromat_from_format (GstVideoFormat format)
+{
+  switch (format) {
+    case GST_VIDEO_FORMAT_GRAY8:
+    case GST_VIDEO_FORMAT_GRAY10_LE32:
+      return STD_VIDEO_H264_CHROMA_FORMAT_IDC_MONOCHROME;
+    case GST_VIDEO_FORMAT_I420:
+    case GST_VIDEO_FORMAT_NV12:
+    case GST_VIDEO_FORMAT_NV12_10LE32:
+      return STD_VIDEO_H264_CHROMA_FORMAT_IDC_420;
+    case GST_VIDEO_FORMAT_NV16:
+    case GST_VIDEO_FORMAT_YUY2:
+    case GST_VIDEO_FORMAT_YVYU:
+    case GST_VIDEO_FORMAT_UYVY:
+    case GST_VIDEO_FORMAT_NV16_10LE32:
+      return STD_VIDEO_H264_CHROMA_FORMAT_IDC_422;
+    default:
+      return STD_VIDEO_H264_CHROMA_FORMAT_IDC_INVALID;
+  }
+
+  return STD_VIDEO_H264_CHROMA_FORMAT_IDC_INVALID;
+}
+
+StdVideoH264PictureType
+gst_vulkan_video_h264_picture_type (GstH264SliceType type, gboolean key_type)
+{
+  switch (type) {
+    case GST_H264_I_SLICE:
+      if (key_type)
+        return STD_VIDEO_H264_PICTURE_TYPE_IDR;
+      else
+        return STD_VIDEO_H264_PICTURE_TYPE_I;
+    case GST_H264_P_SLICE:
+      return STD_VIDEO_H264_PICTURE_TYPE_P;
+    case GST_H264_B_SLICE:
+      return STD_VIDEO_H264_PICTURE_TYPE_B;
+    default:
+      GST_WARNING ("Unsupported picture type '%d'", type);
+      return STD_VIDEO_H264_PICTURE_TYPE_INVALID;
+  }
+}
+
+StdVideoH264SliceType
+gst_vulkan_video_h264_slice_type (GstH264SliceType type)
+{
+  switch (type) {
+    case GST_H264_I_SLICE:
+      return STD_VIDEO_H264_SLICE_TYPE_I;
+    case GST_H264_P_SLICE:
+      return STD_VIDEO_H264_SLICE_TYPE_P;
+    case GST_H264_B_SLICE:
+      return STD_VIDEO_H264_SLICE_TYPE_B;
+    default:
+      GST_WARNING ("Unsupported picture type '%d'", type);
+      return STD_VIDEO_H264_SLICE_TYPE_INVALID;
+  }
+}
