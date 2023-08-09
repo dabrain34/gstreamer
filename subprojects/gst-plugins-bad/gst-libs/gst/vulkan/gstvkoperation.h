@@ -112,7 +112,8 @@ gboolean                gst_vulkan_operation_enable_query       (GstVulkanOperat
                                                                  GError ** error);
 GST_VULKAN_API
 gboolean                gst_vulkan_operation_get_query          (GstVulkanOperation * self,
-                                                                 gint32 * ret,
+                                                                 gsize  data_size,
+                                                                 void * data,
                                                                  GError ** error);
 GST_VULKAN_API
 gboolean                gst_vulkan_operation_begin_query        (GstVulkanOperation * self);

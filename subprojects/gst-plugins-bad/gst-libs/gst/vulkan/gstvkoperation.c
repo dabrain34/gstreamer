@@ -961,11 +961,10 @@ gst_vulkan_operation_enable_query (GstVulkanOperation * self,
  * Since: 1.24
  */
 gboolean
-gst_vulkan_operation_get_query (GstVulkanOperation * self, gint32 * ret,
-    GError ** error)
+gst_vulkan_operation_get_query (GstVulkanOperation * self, gsize data_size,
+    void *data, GError ** error)
 {
   GstVulkanOperationPrivate *priv;
-  gint32 status = 0xFFFFFFFF;
   VkResult res;
   VkQueryResultFlagBits flags = 0;
 
@@ -983,13 +982,11 @@ gst_vulkan_operation_get_query (GstVulkanOperation * self, gint32 * ret,
 #endif
 
   res = vkGetQueryPoolResults (priv->cmd_pool->queue->device->device,
-      priv->query_pool, 1, 1, sizeof (status), &status, sizeof (status), flags);
-  if (res != VK_SUCCESS && res != VK_NOT_READY) {
-    gst_vulkan_error_to_g_error (res, error, "vkGetQueryPoolResults");
+      priv->query_pool, 0, 1, data_size, data, data_size, flags);
+  if (gst_vulkan_error_to_g_error (res, error,
+          "vkGetQueryPoolResults") != VK_SUCCESS) {
     return FALSE;
   }
-
-  *ret = status;
 
   return TRUE;
 }

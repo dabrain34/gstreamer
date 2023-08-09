@@ -617,7 +617,8 @@ gst_vulkan_decoder_decode (GstVulkanDecoder * self,
   pic->decode_info.srcBufferRange = GST_ROUND_UP_N (slices_size,
       priv->caps.caps.minBitstreamBufferSizeAlignment);
 
-  if (gst_vulkan_operation_get_query (priv->exec, &query, error) && query != -1)
+  if (gst_vulkan_operation_get_query (priv->exec, sizeof (query), &query,
+          error) && query != -1)
     GST_INFO_OBJECT (self, "query result: %d", query);
 
   if (!gst_vulkan_operation_start (priv->exec, error))
