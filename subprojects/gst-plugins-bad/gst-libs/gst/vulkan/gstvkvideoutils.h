@@ -36,6 +36,7 @@ struct _GstVulkanVideoProfile
 {
 #if GST_VULKAN_HAVE_VIDEO_EXTENSIONS
   VkVideoProfileInfoKHR profile;
+  VkVideoDecodeUsageInfoKHR usage;
   union {
     VkVideoDecodeH264ProfileInfoKHR h264;
     VkVideoDecodeH265ProfileInfoKHR h265;
