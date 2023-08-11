@@ -664,7 +664,7 @@ gst_vulkan_encoder_encode (GstVulkanEncoder * self,
     .videoSession = priv->session.session->handle,
     .videoSessionParameters = priv->session_params->handle,
     .referenceSlotCount = priv->n_slots,      /* references + setup (curr) */
-    .pReferenceSlots = priv->n_slots ? &priv->dpbImageVideoReferenceSlots[priv->n_slots - 1] : NULL,
+    .pReferenceSlots = priv->n_slots ? priv->dpbImageVideoReferenceSlots : NULL,
   };
   /* *INDENT-ON* */
   priv->vk.CmdBeginVideoCoding (priv->exec->cmd_buf->cmd, &begin_coding);
