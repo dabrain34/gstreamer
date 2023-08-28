@@ -173,6 +173,9 @@ test_defines = [
   '-DDASH_MPD_DATADIR=' + fsmod.as_posix(meson.current_source_dir()) + '/elements/dash_mpd_data',
   '-DGST_USE_UNSTABLE_API',
 ]
+if vulkan_conf.get('GST_VULKAN_HAVE_BETA_EXTENSIONS') == 1
+  test_defines += ['-DVK_ENABLE_BETA_EXTENSIONS=1']
+endif
 
 test_deps = [gst_dep, gstapp_dep, gstbase_dep,
              gstbasecamerabin_dep, gstphotography_dep,

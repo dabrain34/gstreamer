@@ -51,4 +51,8 @@
 
 #include <vulkan/vulkan_core.h>
 
+#ifdef VK_ENABLE_BETA_EXTENSIONS
+#include <vulkan/vulkan_beta.h>
+#endif
+
 #endif /* __GST_VULKAN_API_H__ */
