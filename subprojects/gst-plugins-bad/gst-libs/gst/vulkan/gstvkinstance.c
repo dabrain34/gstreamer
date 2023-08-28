@@ -1103,9 +1103,43 @@ gst_vulkan_instance_get_proc_address (GstVulkanInstance * instance,
 }
 
 /**
+ * gst_vulkan_instance_create_device_with_index:
+ * @instance: a #GstVulkanInstance
+ * @device_index: a device index to select
+ * @error: (out) (optional): a #GError
+ *
+ * Create a device according to the physical device index
+ *
+ * Returns: (transfer full): a new #GstVulkanDevice
+ *
+ * Since: 1.24
+ */
+GstVulkanDevice *
+gst_vulkan_instance_create_device_with_index (GstVulkanInstance * instance,
+    guint device_index, GError ** error)
+{
+  GstVulkanDevice *device;
+
+  g_return_val_if_fail (GST_IS_VULKAN_INSTANCE (instance), NULL);
+  g_return_val_if_fail (device_index < instance->n_physical_devices, NULL);
+
+  device = gst_vulkan_device_new_with_index (instance, device_index);
+
+  if (!gst_vulkan_device_open (device, error)) {
+    gst_object_unref (device);
+    device = NULL;
+  }
+
+  return device;
+}
+
+/**
  * gst_vulkan_instance_create_device:
  * @instance: a #GstVulkanInstance
- * @error: (out) (optional): a #GError
+  * @error: (out) (optional): a #GError
+ *
+ * Try first to instanciate a device with signal handling from the app,
+ * if the signal is not handled, it will instanciate the device 0.
  *
  * Returns: (transfer full): a new #GstVulkanDevice
  *
@@ -1122,16 +1156,14 @@ gst_vulkan_instance_create_device (GstVulkanInstance * instance,
   g_signal_emit (instance, gst_vulkan_instance_signals[SIGNAL_CREATE_DEVICE], 0,
       &device);
 
-  if (!device) {
-    device = gst_vulkan_device_new_with_index (instance, 0);
+  if (device) {
+    if (!gst_vulkan_device_open (device, error)) {
+      gst_object_unref (device);
+      return NULL;
+    }
   }
 
-  if (!gst_vulkan_device_open (device, error)) {
-    gst_object_unref (device);
-    device = NULL;
-  }
-
-  return device;
+  return gst_vulkan_instance_create_device_with_index (instance, 0, error);
 }
 
 /**
