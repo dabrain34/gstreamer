@@ -139,6 +139,7 @@ static gboolean
 gst_vulkan_h264_decoder_open (GstVideoDecoder * decoder)
 {
   GstVulkanH264Decoder *self = GST_VULKAN_H264_DECODER (decoder);
+  int i;
 
   if (!gst_vulkan_ensure_element_data (GST_ELEMENT (decoder), NULL,
           &self->instance)) {
@@ -147,26 +148,31 @@ gst_vulkan_h264_decoder_open (GstVideoDecoder * decoder)
     return FALSE;
   }
 
-  if (!gst_vulkan_device_run_context_query (GST_ELEMENT (decoder),
-          &self->device)) {
-    GError *error = NULL;
-    GST_DEBUG_OBJECT (self, "No device retrieved from peer elements");
-    self->device = gst_vulkan_instance_create_device (self->instance, &error);
-    if (!self->device) {
-      GST_ELEMENT_ERROR (self, RESOURCE, NOT_FOUND,
-          ("Failed to create vulkan device"),
-          ("%s", error ? error->message : ""));
-      g_clear_error (&error);
-      return FALSE;
-    }
-  }
-
   if (!gst_vulkan_queue_run_context_query (GST_ELEMENT (self),
           &self->graphic_queue)) {
     GST_DEBUG_OBJECT (self, "No graphic queue retrieved from peer elements");
   }
 
-  gst_vulkan_device_foreach_queue (self->device, _find_queues, self);
+  for (i = 0; i < self->instance->n_physical_devices; i++) {
+    GError *error = NULL;
+    self->device =
+        gst_vulkan_instance_create_device_with_index (self->instance, i, &error);
+    gst_vulkan_device_foreach_queue (self->device, _find_queues, self);
+    if (self->decode_queue && self->graphic_queue)
+      break;
+    // Cross device is not working. The graphic and decode queue must be from the device.
+    if (self->graphic_queue) {
+      gst_object_unref (self->graphic_queue);
+      self->graphic_queue = NULL;
+    }
+    gst_object_unref (self->device);
+  }
+
+  if (!self->graphic_queue) {
+    GST_ELEMENT_ERROR (self, RESOURCE, NOT_FOUND,
+        ("Failed to create/retrieve vulkan graphic queue"), (NULL));
+    return FALSE;
+  }
 
   if (!self->decode_queue) {
     GST_ELEMENT_ERROR (self, RESOURCE, NOT_FOUND,
