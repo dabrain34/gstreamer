@@ -795,7 +795,7 @@ _raw_to_image_perform (gpointer impl, GstBuffer * inbuf, GstBuffer ** outbuf)
   n_mems = gst_buffer_n_memory (*outbuf);
   n_planes = GST_VIDEO_INFO_N_PLANES (&raw->out_info);
 
-  for (i = 0; i < n_mems; i++) {
+  for (i = 0; i < n_planes; i++) {
     VkBufferImageCopy region;
     GstMemory *in_mem, *out_mem;
     GstVulkanBufferMemory *buf_mem;
