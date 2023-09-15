@@ -573,3 +573,50 @@ gst_vulkan_video_h264_profile_type (GstH264Profile profile)
       return STD_VIDEO_H264_PROFILE_IDC_INVALID;
   }
 }
+
+StdVideoH264LevelIdc
+gst_vulkan_video_h264_level_idc (int level_idc)
+{
+  switch (level_idc) {
+    case GST_H264_LEVEL_L1:
+      return STD_VIDEO_H264_LEVEL_IDC_1_0;
+    case GST_H264_LEVEL_L1_1:
+      return STD_VIDEO_H264_LEVEL_IDC_1_1;
+    case GST_H264_LEVEL_L1_2:
+      return STD_VIDEO_H264_LEVEL_IDC_1_2;
+    case GST_H264_LEVEL_L1_3:
+      return STD_VIDEO_H264_LEVEL_IDC_1_3;
+    case GST_H264_LEVEL_L2:
+      return STD_VIDEO_H264_LEVEL_IDC_2_0;
+    case GST_H264_LEVEL_L2_1:
+      return STD_VIDEO_H264_LEVEL_IDC_2_1;
+    case GST_H264_LEVEL_L2_2:
+      return STD_VIDEO_H264_LEVEL_IDC_2_2;
+    case GST_H264_LEVEL_L3:
+      return STD_VIDEO_H264_LEVEL_IDC_3_0;
+    case GST_H264_LEVEL_L3_1:
+      return STD_VIDEO_H264_LEVEL_IDC_3_1;
+    case GST_H264_LEVEL_L3_2:
+      return STD_VIDEO_H264_LEVEL_IDC_3_2;
+    case GST_H264_LEVEL_L4:
+      return STD_VIDEO_H264_LEVEL_IDC_4_0;
+    case GST_H264_LEVEL_L4_1:
+      return STD_VIDEO_H264_LEVEL_IDC_4_1;
+    case GST_H264_LEVEL_L4_2:
+      return STD_VIDEO_H264_LEVEL_IDC_4_2;
+    case GST_H264_LEVEL_L5:
+      return STD_VIDEO_H264_LEVEL_IDC_5_0;
+    case GST_H264_LEVEL_L5_1:
+      return STD_VIDEO_H264_LEVEL_IDC_5_1;
+    case GST_H264_LEVEL_L5_2:
+      return STD_VIDEO_H264_LEVEL_IDC_5_2;
+    case GST_H264_LEVEL_L6:
+      return STD_VIDEO_H264_LEVEL_IDC_6_0;
+    case GST_H264_LEVEL_L6_1:
+      return STD_VIDEO_H264_LEVEL_IDC_6_1;
+    case GST_H264_LEVEL_L6_2:
+      return STD_VIDEO_H264_LEVEL_IDC_6_2;
+    default:
+      return STD_VIDEO_H264_LEVEL_IDC_INVALID;
+  }
+}

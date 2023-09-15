@@ -472,52 +472,6 @@ _get_h264_profile (GstH264Profile profile_idc)
   }
 }
 
-static StdVideoH264LevelIdc
-_get_h264_level_idc (int level_idc)
-{
-  switch (level_idc) {
-    case 10:
-      return STD_VIDEO_H264_LEVEL_IDC_1_0;
-    case 11:
-      return STD_VIDEO_H264_LEVEL_IDC_1_1;
-    case 12:
-      return STD_VIDEO_H264_LEVEL_IDC_1_2;
-    case 13:
-      return STD_VIDEO_H264_LEVEL_IDC_1_3;
-    case 20:
-      return STD_VIDEO_H264_LEVEL_IDC_2_0;
-    case 21:
-      return STD_VIDEO_H264_LEVEL_IDC_2_1;
-    case 22:
-      return STD_VIDEO_H264_LEVEL_IDC_2_2;
-    case 30:
-      return STD_VIDEO_H264_LEVEL_IDC_3_0;
-    case 31:
-      return STD_VIDEO_H264_LEVEL_IDC_3_1;
-    case 32:
-      return STD_VIDEO_H264_LEVEL_IDC_3_2;
-    case 40:
-      return STD_VIDEO_H264_LEVEL_IDC_4_0;
-    case 41:
-      return STD_VIDEO_H264_LEVEL_IDC_4_1;
-    case 42:
-      return STD_VIDEO_H264_LEVEL_IDC_4_2;
-    case 50:
-      return STD_VIDEO_H264_LEVEL_IDC_5_0;
-    case 51:
-      return STD_VIDEO_H264_LEVEL_IDC_5_1;
-    case 52:
-      return STD_VIDEO_H264_LEVEL_IDC_5_2;
-    case 60:
-      return STD_VIDEO_H264_LEVEL_IDC_6_0;
-    case 61:
-      return STD_VIDEO_H264_LEVEL_IDC_6_1;
-    default:
-    case 62:
-      return STD_VIDEO_H264_LEVEL_IDC_6_2;
-  }
-}
-
 static void
 gst_vulkan_video_profile_from_h264_sps (GstVulkanVideoProfile * profile,
     const GstH264SPS * sps)
@@ -823,7 +777,7 @@ _fill_sps (const GstH264SPS * sps, StdVideoH264SequenceParameterSet * std_sps,
       .vui_parameters_present_flag = sps->vui_parameters_present_flag,
     },
     .profile_idc = sps->profile_idc,
-    .level_idc = _get_h264_level_idc (sps->level_idc),
+    .level_idc = gst_vulkan_video_h264_level_idc (sps->level_idc),
     .chroma_format_idc = sps->chroma_format_idc,
     .seq_parameter_set_id = (uint8_t) sps->id,
     .bit_depth_luma_minus8 = sps->bit_depth_luma_minus8,

@@ -116,4 +116,8 @@ StdVideoH264SliceType               gst_vulkan_video_h264_slice_type (GstH264Sli
 GST_VULKAN_API
 StdVideoH264ProfileIdc              gst_vulkan_video_h264_profile_type (GstH264Profile profile);
 
+GST_VULKAN_API
+StdVideoH264LevelIdc                gst_vulkan_video_h264_level_idc (int level_idc);
+
+
 G_END_DECLS
