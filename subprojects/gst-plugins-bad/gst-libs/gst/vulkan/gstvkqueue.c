@@ -181,9 +181,12 @@ gst_vulkan_queue_create_decoder (GstVulkanQueue * queue, guint codec)
   flags = device->queue_family_props[queue->family].queueFlags;
   supported_video_ops = device->queue_family_ops[queue->family].video;
 
-  if (device->properties.driverVersion < VK_MAKE_VERSION (1, 3, 238)) {
+  if (device->properties.apiVersion < VK_MAKE_VERSION (1, 3, 238)) {
     GST_WARNING_OBJECT (queue,
-        "Driver version doesn't support Video extensions");
+        "API version %d %d %d doesn't support video decode extensions",
+        VK_VERSION_MAJOR (device->properties.apiVersion),
+        VK_VERSION_MINOR (device->properties.apiVersion),
+        VK_VERSION_PATCH (device->properties.apiVersion));
     return NULL;
   }
 
