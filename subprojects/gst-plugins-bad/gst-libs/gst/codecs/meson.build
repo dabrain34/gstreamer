@@ -1,7 +1,9 @@
 codecs_sources = files(
   'gsth264decoder.c',
   'gsth264encoder.c',
+  'gsth265encoder.c',
   'gsth264frame.c',
+  'gsth265frame.c',
   'gsth264picture.c',
   'gsth265decoder.c',
   'gsth265picture.c',
@@ -19,7 +21,9 @@ codecs_sources = files(
 codecs_headers = files(
   'gsth264decoder.h',
   'gsth264encoder.h',
+  'gsth265encoder.h',
   'gsth264frame.h',
+  'gsth265frame.h',
   'gsth264picture.h',
   'gsth265decoder.h',
   'gsth265picture.h',
