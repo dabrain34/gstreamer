@@ -161,6 +161,16 @@ gst_vulkan_video_profile_to_caps (const GstVulkanVideoProfile * profile)
             }
           }
           break;
+        case VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_EXT:
+          if (profile->codec.h265enc.sType == video_codecs_map[i].stype) {
+            int j;
+            for (j = 0; j < G_N_ELEMENTS (h265_profile_map); j++) {
+              if (profile->codec.h265enc.stdProfileIdc
+                  == h265_profile_map[j].vk_profile)
+                profile_str = h265_profile_map[j].profile_str;
+            }
+          }
+          break;
 #endif
         default:
           break;
@@ -311,6 +321,24 @@ gst_vulkan_video_profile_from_caps (GstVulkanVideoProfile * profile,
           for (j = 0; profile_str && j < G_N_ELEMENTS (h264_profile_map); j++) {
             if (g_strcmp0 (profile_str, h264_profile_map[j].profile_str) == 0) {
               profile->codec.h264enc.stdProfileIdc =
+                  h264_profile_map[j].vk_profile;
+              break;
+            }
+          }
+          break;
+        }
+        case VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_EXT:{
+          int j;
+
+          profile->codec.h265enc.sType = video_codecs_map[i].stype;
+          profile->codec.h265enc.stdProfileIdc =
+              STD_VIDEO_H264_PROFILE_IDC_INVALID;
+          profile->profile.pNext = &profile->codec;
+
+          profile_str = gst_structure_get_string (structure, "profile");
+          for (j = 0; profile_str && j < G_N_ELEMENTS (h265_profile_map); j++) {
+            if (g_strcmp0 (profile_str, h265_profile_map[j].profile_str) == 0) {
+              profile->codec.h265enc.stdProfileIdc =
                   h264_profile_map[j].vk_profile;
               break;
             }
@@ -618,5 +646,114 @@ gst_vulkan_video_h264_level_idc (int level_idc)
       return STD_VIDEO_H264_LEVEL_IDC_6_2;
     default:
       return STD_VIDEO_H264_LEVEL_IDC_INVALID;
+  }
+}
+
+
+StdVideoH265ChromaFormatIdc
+gst_vulkan_video_h265_chromat_from_format (GstVideoFormat format)
+{
+  switch (format) {
+    case GST_VIDEO_FORMAT_GRAY8:
+    case GST_VIDEO_FORMAT_GRAY10_LE32:
+      return STD_VIDEO_H265_CHROMA_FORMAT_IDC_MONOCHROME;
+    case GST_VIDEO_FORMAT_I420:
+    case GST_VIDEO_FORMAT_NV12:
+    case GST_VIDEO_FORMAT_NV12_10LE32:
+      return STD_VIDEO_H265_CHROMA_FORMAT_IDC_420;
+    case GST_VIDEO_FORMAT_NV16:
+    case GST_VIDEO_FORMAT_YUY2:
+    case GST_VIDEO_FORMAT_YVYU:
+    case GST_VIDEO_FORMAT_UYVY:
+    case GST_VIDEO_FORMAT_NV16_10LE32:
+      return STD_VIDEO_H265_CHROMA_FORMAT_IDC_422;
+    default:
+      return STD_VIDEO_H265_CHROMA_FORMAT_IDC_INVALID;
+  }
+
+  return STD_VIDEO_H265_CHROMA_FORMAT_IDC_INVALID;
+}
+
+StdVideoH265SliceType
+gst_vulkan_video_h265_slice_type (GstH265SliceType type)
+{
+  switch (type) {
+    case GST_H265_I_SLICE:
+      return STD_VIDEO_H265_SLICE_TYPE_I;
+    case GST_H265_P_SLICE:
+      return STD_VIDEO_H265_SLICE_TYPE_P;
+    case GST_H265_B_SLICE:
+      return STD_VIDEO_H265_SLICE_TYPE_B;
+    default:
+      GST_WARNING ("Unsupported picture type '%d'", type);
+      return STD_VIDEO_H265_SLICE_TYPE_INVALID;
+  }
+}
+
+StdVideoH265PictureType
+gst_vulkan_video_h265_picture_type (GstH265SliceType type, gboolean key_type)
+{
+  switch (type) {
+    case GST_H265_I_SLICE:
+      if (key_type)
+        return STD_VIDEO_H265_PICTURE_TYPE_IDR;
+      else
+        return STD_VIDEO_H265_PICTURE_TYPE_I;
+    case GST_H265_P_SLICE:
+      return STD_VIDEO_H265_PICTURE_TYPE_P;
+    case GST_H265_B_SLICE:
+      return STD_VIDEO_H265_PICTURE_TYPE_B;
+    default:
+      GST_WARNING ("Unsupported picture type '%d'", type);
+      return STD_VIDEO_H265_PICTURE_TYPE_INVALID;
+  }
+}
+
+StdVideoH265ProfileIdc
+gst_vulkan_video_h265_profile_type (GstH265Profile profile)
+{
+  switch (profile) {
+    case GST_H265_PROFILE_IDC_MAIN:
+      return STD_VIDEO_H265_PROFILE_IDC_MAIN;
+    case GST_H265_PROFILE_IDC_MAIN_10:
+      return STD_VIDEO_H265_PROFILE_IDC_MAIN_10;
+    case GST_H265_PROFILE_IDC_MAIN_STILL_PICTURE:
+      return STD_VIDEO_H265_PROFILE_IDC_MAIN_STILL_PICTURE;
+    default:
+      GST_WARNING ("Unsupported profile type '%d'", profile);
+      return STD_VIDEO_H265_PROFILE_IDC_INVALID;
+  }
+}
+
+StdVideoH265LevelIdc
+gst_vulkan_video_h265_level_idc (int level_idc)
+{
+  switch (level_idc) {
+    case GST_H265_LEVEL_L1:
+      return STD_VIDEO_H265_LEVEL_IDC_1_0;
+    case GST_H265_LEVEL_L2:
+      return STD_VIDEO_H265_LEVEL_IDC_2_0;
+    case GST_H265_LEVEL_L3:
+      return STD_VIDEO_H265_LEVEL_IDC_3_0;
+    case GST_H265_LEVEL_L3_1:
+      return STD_VIDEO_H265_LEVEL_IDC_3_1;
+    case GST_H265_LEVEL_L4:
+      return STD_VIDEO_H265_LEVEL_IDC_4_0;
+    case GST_H265_LEVEL_L4_1:
+      return STD_VIDEO_H265_LEVEL_IDC_4_1;
+    case GST_H265_LEVEL_L5:
+      return STD_VIDEO_H265_LEVEL_IDC_5_0;
+    case GST_H265_LEVEL_L5_1:
+      return STD_VIDEO_H265_LEVEL_IDC_5_1;
+    case GST_H265_LEVEL_L5_2:
+      return STD_VIDEO_H265_LEVEL_IDC_5_2;
+    case GST_H265_LEVEL_L6:
+      return STD_VIDEO_H265_LEVEL_IDC_6_0;
+    case GST_H265_LEVEL_L6_1:
+      return STD_VIDEO_H265_LEVEL_IDC_6_1;
+    case GST_H265_LEVEL_L6_2:
+      return STD_VIDEO_H265_LEVEL_IDC_6_2;
+    default:
+      return STD_VIDEO_H265_LEVEL_IDC_INVALID;
   }
 }

@@ -28,6 +28,7 @@
 # define GST_USE_UNSTABLE_API
 #endif
 #include <gst/codecparsers/gsth264parser.h>
+#include <gst/codecparsers/gsth265parser.h>
 #undef GST_USE_UNSTABLE_API
 
 #include <gst/video/video.h>
@@ -119,5 +120,19 @@ StdVideoH264ProfileIdc              gst_vulkan_video_h264_profile_type (GstH264P
 GST_VULKAN_API
 StdVideoH264LevelIdc                gst_vulkan_video_h264_level_idc (int level_idc);
 
+GST_VULKAN_API
+StdVideoH265ChromaFormatIdc         gst_vulkan_video_h265_chromat_from_format (GstVideoFormat format);
+
+GST_VULKAN_API
+StdVideoH265SliceType               gst_vulkan_video_h265_slice_type (GstH265SliceType type);
+
+GST_VULKAN_API
+StdVideoH265PictureType             gst_vulkan_video_h265_picture_type (GstH265SliceType type, gboolean key_type);
+
+GST_VULKAN_API
+StdVideoH265ProfileIdc              gst_vulkan_video_h265_profile_type (GstH265Profile profile);
+
+GST_VULKAN_API
+StdVideoH265LevelIdc                gst_vulkan_video_h265_level_idc (int level_idc);
 
 G_END_DECLS
