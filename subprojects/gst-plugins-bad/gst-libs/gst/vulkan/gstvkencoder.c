@@ -427,6 +427,7 @@ gst_vulkan_encoder_start (GstVulkanEncoder * self,
 
   switch (self->codec) {
     case VK_VIDEO_CODEC_OPERATION_ENCODE_H264_BIT_EXT:
+    case VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_EXT:
       if (!gst_vulkan_video_profile_is_valid (profile, self->codec)) {
         g_set_error (error, GST_VULKAN_ERROR, VK_ERROR_INITIALIZATION_FAILED,
             "Invalid profile");
@@ -451,6 +452,12 @@ gst_vulkan_encoder_start (GstVulkanEncoder * self,
       codec_idx = GST_VK_VIDEO_EXTENSION_ENCODE_H264;
       /* *INDENT-ON* */
       break;
+    case VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_EXT:
+      /* *INDENT-OFF* */
+      priv->caps.codec.h265enc = (VkVideoEncodeH265CapabilitiesEXT) {
+          .sType = VK_STRUCTURE_TYPE_VIDEO_ENCODE_H265_CAPABILITIES_EXT,
+      };
+      codec_idx = GST_VK_VIDEO_EXTENSION_ENCODE_H265;
       /* *INDENT-ON* */
       break;
     default:

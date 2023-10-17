@@ -114,6 +114,7 @@ union _GstVulkanEncoderParameters
 {
   union {
     VkVideoEncodeH264SessionParametersCreateInfoEXT   h264;
+    VkVideoEncodeH265SessionParametersCreateInfoEXT   h265;
   } create;
 };
 

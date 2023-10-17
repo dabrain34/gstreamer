@@ -269,6 +269,9 @@ gst_vulkan_queue_create_encoder (GstVulkanQueue * queue,
     case VK_VIDEO_CODEC_OPERATION_ENCODE_H264_BIT_EXT:
       extension = VK_EXT_VIDEO_ENCODE_H264_EXTENSION_NAME;
       break;
+    case VK_VIDEO_CODEC_OPERATION_ENCODE_H265_BIT_EXT:
+      extension = VK_EXT_VIDEO_ENCODE_H265_EXTENSION_NAME;
+      break;
     default:
       GST_WARNING_OBJECT (queue, "Unsupported codec");
       return NULL;

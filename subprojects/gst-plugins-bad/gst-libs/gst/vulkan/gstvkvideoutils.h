@@ -53,6 +53,7 @@ struct _GstVulkanVideoProfile
     VkVideoDecodeH265ProfileInfoKHR h265dec;
 #ifdef VK_ENABLE_BETA_EXTENSIONS
     VkVideoEncodeH264ProfileInfoEXT h264enc;
+    VkVideoEncodeH265ProfileInfoEXT h265enc;
 #endif
   } codec;
 #endif
@@ -71,6 +72,7 @@ struct _GstVulkanVideoCapabilites
     VkVideoDecodeH265CapabilitiesKHR h265dec;
 #ifdef VK_ENABLE_BETA_EXTENSIONS
     VkVideoEncodeH264CapabilitiesEXT h264enc;
+    VkVideoEncodeH265CapabilitiesEXT h265enc;
 #endif
   } codec;
 #endif
