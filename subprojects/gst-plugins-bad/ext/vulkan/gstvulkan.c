@@ -44,6 +44,7 @@
 #include "vkh264dec.h"
 #ifdef VK_ENABLE_BETA_EXTENSIONS
 # include "vkh264enc.h"
+# include "vkh265enc.h"
 #endif
 #endif
 
@@ -74,6 +75,7 @@ plugin_init (GstPlugin * plugin)
   ret |= GST_ELEMENT_REGISTER (vulkanh264dec, plugin);
 #if VK_ENABLE_BETA_EXTENSIONS
   ret |= GST_ELEMENT_REGISTER (vulkanh264enc, plugin);
+  ret |= GST_ELEMENT_REGISTER (vulkanh265enc, plugin);
 #endif
 #endif
 

@@ -39,6 +39,7 @@ if vulkan_conf.get('GST_VULKAN_HAVE_VIDEO_EXTENSIONS') == 1
   vulkan_sources += files('vkh264dec.c')
   if vulkan_conf.get('GST_VULKAN_HAVE_BETA_EXTENSIONS') == 1
     vulkan_sources += files('vkh264enc.c')
+    vulkan_sources += files('vkh265enc.c')
     vulkan_args += ['-DVK_ENABLE_BETA_EXTENSIONS=1']
   endif
   extra_deps += gstcodecs_dep
